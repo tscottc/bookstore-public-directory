@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>John K. King Bookstore - Public Directory</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>John K. King Bookstore Directory</h1>
+    </header>
+
+    <main>
+      <!-- Search Directory Section -->
+      <section id="directory-section">
+        <h2>Search Directory</h2>
+        <div class="search-controls">
+          <input
+            type="text"
+            id="search-bar"
+            placeholder="Search for a subject..."
+            autocomplete="off"
+          />
+          <select id="floor-filter">
+            <option value="">All Floors</option>
+          </select>
+          <button id="search-button">Search</button>
+          <button id="reset-button">Reset</button>
+        </div>
+        <div id="search-status"></div>
+        <div id="row-count"></div>
+        <div id="results-container">
+          <p id="loading-message">Loading directory...</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
