@@ -110,16 +110,9 @@ function performDirectorySearch(isFinalSearch = false) {
 async function initializeDirectoryPage() {
   isDirectoryInitialized = true;
   try {
-    console.log('Fetching directory data from:', DIRECTORY_CSV_URL);
     const response = await fetch(DIRECTORY_CSV_URL);
-    console.log('Response status:', response.status);
-
     const text = await response.text();
-    console.log('CSV text length:', text.length);
-    console.log('First 200 chars:', text.substring(0, 200));
-
     directoryData = parseCSV(text);
-    console.log('Parsed directory data:', directoryData.length, 'entries');
 
     // Initialize Fuse.js for fuzzy search
     directoryFuse = new Fuse(directoryData, {
@@ -133,7 +126,7 @@ async function initializeDirectoryPage() {
     elements.rowCount.textContent = `Showing all ${directoryData.length} entries.`;
   } catch (e) {
     console.error("Directory Init Error", e);
-    elements.resultsContainer.innerHTML = `<p class="error">Error loading directory data: ${e.message}</p>`;
+    elements.resultsContainer.innerHTML = `<p class="error">Error loading directory data. Please refresh the page.</p>`;
   }
 }
 
