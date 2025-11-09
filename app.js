@@ -14,36 +14,8 @@ let faqData = [];
 let faqFuse;
 let isFaqInitialized = false;
 
-// --- DOM Elements ---
-const elements = {
-  // Directory elements
-  searchBar: document.getElementById('search-bar'),
-  searchButton: document.getElementById('search-button'),
-  resetButton: document.getElementById('reset-button'),
-  floorFilter: document.getElementById('floor-filter'),
-  resultsContainer: document.getElementById('results-container'),
-  searchStatus: document.getElementById('search-status'),
-  rowCount: document.getElementById('row-count'),
-  loadingMessage: document.getElementById('loading-message'),
-
-  // FAQ elements
-  faqSearchBar: document.getElementById('faq-search-bar'),
-  faqSearchButton: document.getElementById('faq-search-button'),
-  faqResetButton: document.getElementById('faq-reset-button'),
-  faqResultsContainer: document.getElementById('faq-results-container'),
-  faqSearchStatus: document.getElementById('faq-search-status'),
-  faqRowCount: document.getElementById('faq-row-count'),
-  faqLoadingMessage: document.getElementById('faq-loading-message'),
-
-  // Navigation and sections
-  navButtons: document.querySelectorAll('.nav-btn'),
-  sections: document.querySelectorAll('.section'),
-
-  // Modal elements
-  feedbackBtn: document.getElementById('feedback-btn'),
-  feedbackModalOverlay: document.getElementById('feedback-modal-overlay'),
-  closeFeedbackModal: document.getElementById('close-feedback-modal')
-};
+// --- DOM Elements (will be initialized after DOM loads) ---
+let elements = {};
 
 // --- Helper Functions ---
 
@@ -138,9 +110,16 @@ function performDirectorySearch(isFinalSearch = false) {
 async function initializeDirectoryPage() {
   isDirectoryInitialized = true;
   try {
+    console.log('Fetching directory data from:', DIRECTORY_CSV_URL);
     const response = await fetch(DIRECTORY_CSV_URL);
+    console.log('Response status:', response.status);
+
     const text = await response.text();
+    console.log('CSV text length:', text.length);
+    console.log('First 200 chars:', text.substring(0, 200));
+
     directoryData = parseCSV(text);
+    console.log('Parsed directory data:', directoryData.length, 'entries');
 
     // Initialize Fuse.js for fuzzy search
     directoryFuse = new Fuse(directoryData, {
@@ -154,7 +133,7 @@ async function initializeDirectoryPage() {
     elements.rowCount.textContent = `Showing all ${directoryData.length} entries.`;
   } catch (e) {
     console.error("Directory Init Error", e);
-    elements.resultsContainer.innerHTML = `<p class="error">Error loading directory data. Please refresh the page.</p>`;
+    elements.resultsContainer.innerHTML = `<p class="error">Error loading directory data: ${e.message}</p>`;
   }
 }
 
@@ -321,54 +300,86 @@ function closeFeedbackModal() {
   elements.feedbackModalOverlay.style.display = 'none';
 }
 
-// --- Event Listeners ---
-
-// Directory Listeners
-elements.floorFilter.addEventListener('change', () => performDirectorySearch(true));
-
-elements.searchBar.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    performDirectorySearch(true);
-  }
-});
-
-elements.searchButton.addEventListener('click', () => performDirectorySearch(true));
-elements.resetButton.addEventListener('click', resetSearch);
-
-// FAQ Listeners
-elements.faqSearchBar.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    performFaqSearch(true);
-  }
-});
-
-elements.faqSearchButton.addEventListener('click', () => performFaqSearch(true));
-elements.faqResetButton.addEventListener('click', resetFaqSearch);
-
-// Navigation Listeners
-elements.navButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const section = btn.dataset.section;
-    if (section) {
-      switchSection(section);
-    }
-  });
-});
-
-// Modal Listeners
-elements.feedbackBtn.addEventListener('click', openFeedbackModal);
-elements.closeFeedbackModal.addEventListener('click', closeFeedbackModal);
-
-// Close modal when clicking outside
-elements.feedbackModalOverlay.addEventListener('click', (e) => {
-  if (e.target === elements.feedbackModalOverlay) {
-    closeFeedbackModal();
-  }
-});
-
 // --- Initialize App ---
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize DOM elements after page loads
+  elements = {
+    // Directory elements
+    searchBar: document.getElementById('search-bar'),
+    searchButton: document.getElementById('search-button'),
+    resetButton: document.getElementById('reset-button'),
+    floorFilter: document.getElementById('floor-filter'),
+    resultsContainer: document.getElementById('results-container'),
+    searchStatus: document.getElementById('search-status'),
+    rowCount: document.getElementById('row-count'),
+    loadingMessage: document.getElementById('loading-message'),
+
+    // FAQ elements
+    faqSearchBar: document.getElementById('faq-search-bar'),
+    faqSearchButton: document.getElementById('faq-search-button'),
+    faqResetButton: document.getElementById('faq-reset-button'),
+    faqResultsContainer: document.getElementById('faq-results-container'),
+    faqSearchStatus: document.getElementById('faq-search-status'),
+    faqRowCount: document.getElementById('faq-row-count'),
+    faqLoadingMessage: document.getElementById('faq-loading-message'),
+
+    // Navigation and sections
+    navButtons: document.querySelectorAll('.nav-btn'),
+    sections: document.querySelectorAll('.section'),
+
+    // Modal elements
+    feedbackBtn: document.getElementById('feedback-btn'),
+    feedbackModalOverlay: document.getElementById('feedback-modal-overlay'),
+    closeFeedbackModal: document.getElementById('close-feedback-modal')
+  };
+
+  // --- Event Listeners ---
+
+  // Directory Listeners
+  elements.floorFilter.addEventListener('change', () => performDirectorySearch(true));
+
+  elements.searchBar.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      performDirectorySearch(true);
+    }
+  });
+
+  elements.searchButton.addEventListener('click', () => performDirectorySearch(true));
+  elements.resetButton.addEventListener('click', resetSearch);
+
+  // FAQ Listeners
+  elements.faqSearchBar.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      performFaqSearch(true);
+    }
+  });
+
+  elements.faqSearchButton.addEventListener('click', () => performFaqSearch(true));
+  elements.faqResetButton.addEventListener('click', resetFaqSearch);
+
+  // Navigation Listeners
+  elements.navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.dataset.section;
+      if (section) {
+        switchSection(section);
+      }
+    });
+  });
+
+  // Modal Listeners
+  elements.feedbackBtn.addEventListener('click', openFeedbackModal);
+  elements.closeFeedbackModal.addEventListener('click', closeFeedbackModal);
+
+  // Close modal when clicking outside
+  elements.feedbackModalOverlay.addEventListener('click', (e) => {
+    if (e.target === elements.feedbackModalOverlay) {
+      closeFeedbackModal();
+    }
+  });
+
+  // Initialize directory page
   initializeDirectoryPage();
 });
