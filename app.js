@@ -253,6 +253,9 @@ function resetFaqSearch() {
  * Switch between Directory and FAQ sections
  */
 function switchSection(sectionName) {
+  // Update URL hash
+  window.location.hash = sectionName;
+
   // Update active nav button
   elements.navButtons.forEach(btn => {
     if (btn.dataset.section === sectionName) {
@@ -375,4 +378,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize directory page
   initializeDirectoryPage();
+
+  // Hash-based routing: Read URL hash on page load
+  const hash = window.location.hash.slice(1); // Remove '#' from hash
+  if (hash === 'faq') {
+    switchSection('faq');
+  } else if (hash === 'directory') {
+    switchSection('directory');
+  }
+  // If no hash or invalid hash, stay on default (directory) section
+
+  // Listen for hash changes (back/forward button support)
+  window.addEventListener('hashchange', () => {
+    const newHash = window.location.hash.slice(1);
+    if (newHash === 'directory' || newHash === 'faq') {
+      switchSection(newHash);
+    }
+  });
 });
