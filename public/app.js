@@ -39,7 +39,19 @@ function parseCSV(csvText) {
  */
 function populateFloorFilter() {
   if (!directoryData || directoryData.length === 0) return;
-  const floors = [...new Set(directoryData.map(item => item['FLOOR']))].filter(Boolean).sort((a, b) => a - b);
+
+  // Clear existing dynamically added options, keeping the first static "All Floors" option
+  while (elements.floorFilter.children.length > 1) { // Keep the first child (the static "All Floors" option)
+    elements.floorFilter.removeChild(elements.floorFilter.lastChild);
+  }
+
+  const floors = [...new Set(directoryData.map(item => item['FLOOR']))]
+    .filter(floor => {
+      const parsed = parseInt(floor);
+      return !isNaN(parsed) && parsed > 0; // Only include positive integers
+    })
+    .sort((a, b) => a - b);
+
   floors.forEach(floor => {
     const option = document.createElement('option');
     option.value = floor;
