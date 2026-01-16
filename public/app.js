@@ -60,7 +60,8 @@ function renderDirectoryTable(data, query = '') {
       elements.resultsContainer.innerHTML = `
         <div class="no-results">
           <p>No results found for "<strong>${query}</strong>".</p>
-          <p class="suggestion-text">Try searching with different keywords or check the spelling.</p>
+          <p class="suggestion-text">Please consider suggesting a subject area to add to the directory.</p>
+          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfbHuDXDbKlq85_eDGzYY6xtzqNEXCi7pUlR2I5C0t2EawzIA/viewform?embedded=true" width="640" height="600" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
         </div>`;
     } else {
       elements.resultsContainer.innerHTML = `<p class="no-results">No results found.</p>`;

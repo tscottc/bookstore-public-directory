@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "default": "store-directory-3"
+  },
+  "targets": {
+    "store-directory-3": {
+      "hosting": {
+        "public": [
+          "midwestattic",
+          "store-directory-3"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
