@@ -6,7 +6,6 @@
     "store-directory-3": {
       "hosting": {
         "public": [
-          "midwestattic",
           "store-directory-3"
         ]
       }

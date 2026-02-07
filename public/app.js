@@ -370,10 +370,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Navigation Listeners
   elements.navButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (event) => {
       const section = btn.dataset.section;
       if (section) {
         switchSection(section);
+      } else {
+        // If there's no data-section, it's likely an external link, so let default behavior happen
+        // Prevent default only if it's not an external link, or handle it differently if needed.
+        // For now, allow default for external links.
       }
     });
   });
