@@ -134,8 +134,11 @@ async function initializeDirectoryPage() {
         { name: 'SUBJECT', weight: 0.7 },
         { name: 'KEYWORDS', weight: 0.3 }
       ],
-      threshold: 0.3,
-      ignoreLocation: true
+      threshold: 0.2,
+      ignoreLocation: true,
+      useExtendedSearch: true,
+      findAllMatches: false,
+      ignoreFieldNorm: true
     });
 
     populateFloorFilter();
@@ -190,8 +193,11 @@ async function initializeFaqPage() {
         { name: 'Answer', weight: 0.3 },
         { name: 'Keywords', weight: 0.5 }
       ],
-      threshold: 0.3,
-      ignoreLocation: true
+      threshold: 0.2,
+      ignoreLocation: true,
+      useExtendedSearch: true,
+      findAllMatches: false,
+      ignoreFieldNorm: true
     });
 
     renderFaqCards(faqData);
