@@ -99,7 +99,7 @@ function performDirectorySearch(isFinalSearch = false) {
 
   let results = directoryData;
 
-  if (query) {
+  if (query && directoryFuse) {
     results = directoryFuse.search(query).map(r => r.item);
   }
 
@@ -124,13 +124,17 @@ async function initializeDirectoryPage() {
   isDirectoryInitialized = true;
   try {
     const response = await fetch(DIRECTORY_CSV_URL);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const text = await response.text();
     directoryData = parseCSV(text);
 
-    // Initialize Fuse.js for fuzzy search
+    // Initialize Fuse.js for weighted fuzzy search
     directoryFuse = new Fuse(directoryData, {
-      keys: Object.keys(directoryData[0] || {}),
-      threshold: 0.4,
+      keys: [
+        { name: 'SUBJECT', weight: 0.7 },
+        { name: 'KEYWORDS', weight: 0.3 }
+      ],
+      threshold: 0.3,
       ignoreLocation: true
     });
 
@@ -139,7 +143,19 @@ async function initializeDirectoryPage() {
     elements.rowCount.textContent = `Showing all ${directoryData.length} entries.`;
   } catch (e) {
     console.error("Directory Init Error", e);
-    elements.resultsContainer.innerHTML = `<p class="error">Error loading directory data. Please refresh the page.</p>`;
+    if (elements.loadingMessage) elements.loadingMessage.style.display = 'none';
+    elements.rowCount.textContent = '';
+    isDirectoryInitialized = false;
+    elements.resultsContainer.innerHTML = `
+      <div class="no-results">
+        <p>Unable to load directory data. Please check your connection and try again.</p>
+        <button id="retry-directory" class="retry-btn">Retry</button>
+      </div>`;
+    document.getElementById('retry-directory').addEventListener('click', () => {
+      elements.resultsContainer.innerHTML = '';
+      if (elements.loadingMessage) elements.loadingMessage.style.display = '';
+      initializeDirectoryPage();
+    }, { once: true });
   }
 }
 
@@ -163,6 +179,7 @@ async function initializeFaqPage() {
   isFaqInitialized = true;
   try {
     const response = await fetch(FAQ_CSV_URL);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const text = await response.text();
     faqData = parseCSV(text);
 
@@ -173,7 +190,7 @@ async function initializeFaqPage() {
         { name: 'Answer', weight: 0.3 },
         { name: 'Keywords', weight: 0.5 }
       ],
-      threshold: 0.4,
+      threshold: 0.3,
       ignoreLocation: true
     });
 
@@ -181,7 +198,19 @@ async function initializeFaqPage() {
     elements.faqRowCount.textContent = `Showing all ${faqData.length} questions.`;
   } catch (e) {
     console.error("FAQ Init Error", e);
-    elements.faqResultsContainer.innerHTML = `<p class="error">Error loading FAQ data. Please refresh the page.</p>`;
+    if (elements.faqLoadingMessage) elements.faqLoadingMessage.style.display = 'none';
+    elements.faqRowCount.textContent = '';
+    isFaqInitialized = false;
+    elements.faqResultsContainer.innerHTML = `
+      <div class="no-results">
+        <p>Unable to load FAQ data. Please check your connection and try again.</p>
+        <button id="retry-faq" class="retry-btn">Retry</button>
+      </div>`;
+    document.getElementById('retry-faq').addEventListener('click', () => {
+      elements.faqResultsContainer.innerHTML = '';
+      if (elements.faqLoadingMessage) elements.faqLoadingMessage.style.display = '';
+      initializeFaqPage();
+    }, { once: true });
   }
 }
 
@@ -224,14 +253,6 @@ function renderFaqCards(data, query = '') {
       </div>`;
   });
   elements.faqResultsContainer.innerHTML = cardHTML + '</div>';
-
-  // Add click handlers for FAQ accordion
-  document.querySelectorAll('.faq-question').forEach(qDiv => {
-    qDiv.addEventListener('click', () => {
-      qDiv.nextElementSibling.classList.toggle('expanded');
-      qDiv.querySelector('.faq-toggle-icon').classList.toggle('rotated');
-    });
-  });
 }
 
 /**
@@ -241,7 +262,7 @@ function renderFaqCards(data, query = '') {
 function performFaqSearch(isFinalSearch = false) {
   const query = elements.faqSearchBar.value.trim();
 
-  const results = query ? faqFuse.search(query).map(r => r.item) : faqData;
+  const results = (query && faqFuse) ? faqFuse.search(query).map(r => r.item) : faqData;
   renderFaqCards(results, query);
   elements.faqRowCount.textContent = `Found ${results.length} of ${faqData.length} questions.`;
 
@@ -367,6 +388,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   elements.faqSearchButton.addEventListener('click', () => performFaqSearch(true));
   elements.faqResetButton.addEventListener('click', resetFaqSearch);
+
+  // FAQ accordion - single delegated listener on the parent container
+  elements.faqResultsContainer.addEventListener('click', (e) => {
+    const card = e.target.closest('.faq-card');
+    if (!card) return;
+    card.querySelector('.faq-answer').classList.toggle('expanded');
+    card.querySelector('.faq-toggle-icon').classList.toggle('rotated');
+  });
 
   // Navigation Listeners
   elements.navButtons.forEach(btn => {
