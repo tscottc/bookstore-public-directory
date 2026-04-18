@@ -489,6 +489,62 @@ tr:hover {
   border-radius: 0 0 12px 12px;
 }
 
+/* Help Button */
+.help-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(74, 85, 104, 0.8);
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.help-btn:hover {
+  background-color: rgba(45, 55, 72, 0.95);
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Help Modal Content */
+.help-modal-content {
+  height: auto;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.help-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.help-section h3 {
+  color: #2d3748;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.help-section p {
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
@@ -557,6 +613,19 @@ tr:hover {
 
   .modal-iframe-container {
     margin: 0 -20px -20px -20px;
+  }
+
+  .help-btn {
+    bottom: 16px;
+    right: 16px;
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+  }
+
+  .help-modal-content {
+    height: auto;
+    max-height: 90vh;
   }
 }
 

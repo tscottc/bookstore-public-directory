@@ -336,6 +336,20 @@ function closeFeedbackModal() {
   elements.feedbackModalOverlay.style.display = 'none';
 }
 
+/**
+ * Open help modal
+ */
+function openHelpModal() {
+  elements.helpModalOverlay.style.display = 'flex';
+}
+
+/**
+ * Close help modal
+ */
+function closeHelpModal() {
+  elements.helpModalOverlay.style.display = 'none';
+}
+
 // --- Initialize App ---
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize DOM elements after page loads
@@ -366,7 +380,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal elements
     feedbackBtn: document.getElementById('feedback-btn'),
     feedbackModalOverlay: document.getElementById('feedback-modal-overlay'),
-    closeFeedbackModal: document.getElementById('close-feedback-modal')
+    closeFeedbackModal: document.getElementById('close-feedback-modal'),
+
+    // Help modal elements
+    helpBtn: document.getElementById('help-btn'),
+    helpModalOverlay: document.getElementById('help-modal-overlay'),
+    closeHelpModal: document.getElementById('close-help-modal')
   };
 
   // --- Event Listeners ---
@@ -425,6 +444,15 @@ document.addEventListener('DOMContentLoaded', () => {
   elements.feedbackModalOverlay.addEventListener('click', (e) => {
     if (e.target === elements.feedbackModalOverlay) {
       closeFeedbackModal();
+    }
+  });
+
+  // Help Modal Listeners
+  elements.helpBtn.addEventListener('click', openHelpModal);
+  elements.closeHelpModal.addEventListener('click', closeHelpModal);
+  elements.helpModalOverlay.addEventListener('click', (e) => {
+    if (e.target === elements.helpModalOverlay) {
+      closeHelpModal();
     }
   });
 
