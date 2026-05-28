@@ -97,6 +97,15 @@ function performDirectorySearch(isFinalSearch = false) {
   const query = elements.searchBar.value.trim();
   const floor = elements.floorFilter.value;
 
+  if (isFinalSearch && query) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'site_search',
+      search_term: query,
+      search_location: 'directory'
+    });
+  }
+
   let results = directoryData;
 
   if (query && directoryFuse) {
@@ -267,6 +276,15 @@ function renderFaqCards(data, query = '') {
  */
 function performFaqSearch(isFinalSearch = false) {
   const query = elements.faqSearchBar.value.trim();
+
+  if (isFinalSearch && query) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'site_search',
+      search_term: query,
+      search_location: 'faq'
+    });
+  }
 
   const results = (query && faqFuse) ? faqFuse.search(query).map(r => r.item) : faqData;
   renderFaqCards(results, query);
