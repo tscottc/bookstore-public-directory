@@ -545,6 +545,45 @@ tr:hover {
   line-height: 1.7;
 }
 
+.help-section p + p {
+  margin-top: 8px;
+}
+
+.hours-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: #4a5568;
+}
+
+.hours-list dt {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hours-list dd {
+  margin: 0;
+}
+
+.help-footer-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.help-footer-links a {
+  font-size: 0.85rem;
+  color: #718096;
+  text-decoration: underline;
+}
+
+.help-footer-links a:hover {
+  color: #2d3748;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
