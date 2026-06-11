@@ -9,7 +9,7 @@ An interactive web app for [John K. King Used & Rare Books](https://www.johnking
 - **Directory search** — Find where a book subject is shelved, with optional floor filtering
 - **FAQ** — Browse and search common questions about the store
 - **Feedback** — Submit suggestions via an embedded Google Form
-- **Help / Privacy Policy** — Accessible via a fixed "?" button in the corner
+- **Help modal** — Fixed "?" button opens a guide covering search usage, a directory key (P.B., H.C., End Cap, Case, Center), a floor orientation map (N/S/E/W anchored to building landmarks), store hours, contact info, and links to Feedback and Privacy Policy
 
 Navigation is hash-based (`#directory`, `#faq`) so browser back/forward works naturally.
 
@@ -37,7 +37,7 @@ bookstore-public-directory/
 ├── public/
 │   ├── index.html     # Entry point — markup, nav, modals
 │   ├── app.js         # All application logic (~518 lines)
-│   ├── style.css      # All styles (~635 lines)
+│   ├── style.css      # All styles (~687 lines)
 │   └── 404.html       # Firebase 404 fallback page
 ├── firebase.json      # Firebase hosting config (serves public/)
 ├── .firebaserc        # Firebase project: store-directory-3
@@ -121,6 +121,30 @@ Firebase is configured to serve the `public/` directory and ignore dotfiles and 
 - **Accordion cards** — FAQ answers expand/collapse with a smooth CSS animation; only the clicked card opens
 - **Event delegation** — FAQ accordion clicks use a single listener on the container, not per-card listeners
 - **Mobile responsive** — Layout stacks below 768px; inputs and buttons go full-width; table scrolls horizontally
+
+---
+
+## Help Modal
+
+The fixed `?` button (bottom-right corner) opens a scrollable modal with five sections:
+
+| Section | Contents |
+|---------|----------|
+| About This Directory | What the search does, how to use it |
+| Directory Key | P.B. (Paperback), H.C. (Hardcover), End Cap, Case, Center — plain-English definitions |
+| Finding Your Way | N/S/E/W orientation anchored to building landmarks; note on Front/Rear/East/West directory terms |
+| What This Does Not Do | No book/title/author search; direct to staff for specific items |
+| Store Hours & Contact | Current hours, address, phone; links to Feedback form and Privacy Policy |
+
+### Store hours (as of last update)
+
+| Day | Hours |
+|-----|-------|
+| Monday | 11am – 4pm |
+| Tuesday – Saturday | 9:30am – 5:30pm |
+| Sunday | Closed |
+
+> Verify current hours at [johnkingbooksdetroit.com](https://www.johnkingbooksdetroit.com) before updating.
 
 ---
 
