@@ -17,7 +17,18 @@ let isFaqInitialized = false;
 // --- DOM Elements (will be initialized after DOM loads) ---
 let elements = {};
 
+const SEARCH_LOG_URL = 'https://script.google.com/macros/s/AKfycbxXtKs2ESAO60892CKNKkSlQlRHz-C8QmmKDjfaXq9fy2GTvXp6fVzHywqg1Eg-Kq9P/exec';
+
 // --- Helper Functions ---
+
+function logSearchQuery(query, resultCount, source) {
+  fetch(SEARCH_LOG_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, resultCount, source })
+  }).catch(() => {});
+}
 
 /**
  * Parse CSV text into array of objects
@@ -119,6 +130,10 @@ function performDirectorySearch(isFinalSearch = false) {
   renderDirectoryTable(results, query);
   elements.rowCount.textContent = `Found ${results.length} of ${directoryData.length} entries.`;
 
+  if (isFinalSearch && query) {
+    logSearchQuery(query, results.length, 'directory');
+  }
+
   // Hide keyboard on mobile after search
   if (isFinalSearch && elements.searchBar) {
     elements.searchBar.blur();
@@ -137,13 +152,16 @@ async function initializeDirectoryPage() {
     const text = await response.text();
     directoryData = parseCSV(text);
 
-    // Initialize Fuse.js for weighted fuzzy search
+    // Initialize Fuse.js for weighted fuzzy search.
+    // threshold must be >= max(weight_A, weight_B) for a match in either field alone to pass.
+    // Equal weights (0.5/0.5) with threshold 0.6 means a perfect match in EITHER field scores
+    // 0.5 (passes), while no match in either field scores ~1.0 (fails).
     directoryFuse = new Fuse(directoryData, {
       keys: [
-        { name: 'SUBJECT', weight: 0.7 },
-        { name: 'KEYWORDS', weight: 0.3 }
+        { name: 'SUBJECT', weight: 0.5 },
+        { name: 'KEYWORDS', weight: 0.5 }
       ],
-      threshold: 0.2,
+      threshold: 0.6,
       ignoreLocation: true,
       useExtendedSearch: true,
       findAllMatches: false,
@@ -289,6 +307,10 @@ function performFaqSearch(isFinalSearch = false) {
   const results = (query && faqFuse) ? faqFuse.search(query).map(r => r.item) : faqData;
   renderFaqCards(results, query);
   elements.faqRowCount.textContent = `Found ${results.length} of ${faqData.length} questions.`;
+
+  if (isFinalSearch && query) {
+    logSearchQuery(query, results.length, 'faq');
+  }
 
   // Hide keyboard on mobile after search
   if (isFinalSearch && elements.faqSearchBar) {
