@@ -549,7 +549,8 @@ tr:hover {
   margin-top: 8px;
 }
 
-.hours-list {
+.hours-list,
+.key-list {
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 4px 16px;
@@ -558,13 +559,25 @@ tr:hover {
   color: #4a5568;
 }
 
-.hours-list dt {
+.hours-list dt,
+.key-list dt {
   font-weight: 600;
   white-space: nowrap;
 }
 
-.hours-list dd {
+.hours-list dd,
+.key-list dd {
   margin: 0;
+}
+
+.key-list {
+  gap: 8px 16px;
+}
+
+.key-note {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  color: #718096;
 }
 
 .help-footer-links {
