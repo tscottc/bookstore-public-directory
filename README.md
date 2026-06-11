@@ -36,8 +36,8 @@ No `npm`, no build step, no bundler. The entire app is three files: `index.html`
 bookstore-public-directory/
 ├── public/
 │   ├── index.html     # Entry point — markup, nav, modals
-│   ├── app.js         # All application logic (~496 lines)
-│   ├── style.css      # All styles (~640 lines)
+│   ├── app.js         # All application logic (~518 lines)
+│   ├── style.css      # All styles (~635 lines)
 │   └── 404.html       # Firebase 404 fallback page
 ├── firebase.json      # Firebase hosting config (serves public/)
 ├── .firebaserc        # Firebase project: store-directory-3
@@ -85,13 +85,15 @@ To update the data, edit the Google Sheets directly. Changes reflect immediately
 Search is entirely client-side via **Fuse.js** — no server involved.
 
 ### Directory search
-- Fuzzy matches against `SUBJECT` (70% weight) and `KEYWORDS` (30% weight)
+- Fuzzy matches against `SUBJECT` (50% weight) and `KEYWORDS` (50% weight)
 - Optional floor dropdown filter (AND logic with text search)
-- Threshold `0.2`, `ignoreLocation: true`, `ignoreFieldNorm: true` for balanced relevance
+- Threshold `0.6`, `ignoreLocation: true`, `ignoreFieldNorm: true`
+
+**Weight/threshold constraint:** For a match in either field alone to produce a result, the threshold must be ≥ the maximum individual weight. With equal 0.5/0.5 weights, a perfect match in either `SUBJECT` or `KEYWORDS` alone scores 0.5 (passes). Raising weight on one field above the threshold would silently break keyword-only searches.
 
 ### FAQ search
 - Fuzzy matches against `Question` (60%), `Keywords` (50%), `Answer` (30%)
-- Same Fuse.js configuration
+- Threshold `0.2`, same other Fuse.js options
 
 Both searches support typos and partial matches. Results update on Enter or button click.
 
@@ -134,6 +136,10 @@ Firebase is configured to serve the `public/` directory and ignore dotfiles and 
 | `site_search` | Enter key or search button click (non-empty query only) | `search_term`, `search_location` (`'directory'` or `'faq'`) |
 
 The push fires once per submitted search — not on every keystroke — giving one clean event per actual search interaction.
+
+### Search query logging
+
+Every submitted search is also sent to a Google Apps Script endpoint (`SEARCH_LOG_URL` in `app.js`) via a fire-and-forget `POST`. The payload is `{ query, resultCount, source }`. Failures are silently swallowed — logging never blocks the UI. This log is separate from GA4 and provides a raw query history in a Google Sheet.
 
 No analytics configuration is needed for local development.
 
