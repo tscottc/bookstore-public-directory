@@ -7,7 +7,7 @@ const FAQ_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT_rXkbRD1r
 
 // --- State Variables ---
 let directoryData = [];
-let directoryFuse;
+let directoryIndex = [];
 let isDirectoryInitialized = false;
 
 let faqData = [];
@@ -21,12 +21,12 @@ const SEARCH_LOG_URL = 'https://script.google.com/macros/s/AKfycbxXtKs2ESAO60892
 
 // --- Helper Functions ---
 
-function logSearchQuery(query, resultCount, source) {
+function logSearchQuery(query, resultCount, source, stage) {
   fetch(SEARCH_LOG_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, resultCount, source })
+    body: JSON.stringify({ query, resultCount, source, stage })
   }).catch(() => {});
 }
 
@@ -100,9 +100,95 @@ function renderDirectoryTable(data, query = '') {
   elements.resultsContainer.innerHTML = tableHTML + '</tbody></table>';
 }
 
+// --- Directory Search Engine ---
+
+function buildDirectoryIndex(rows) {
+  return rows.map(row => ({
+    row,
+    kwPhrases: (row['KEYWORDS'] || '').split(',').map(s => s.trim()).filter(Boolean),
+    subjWords: row['SUBJECT'].split(/\s+/).map(w => w.replace(/[^a-zA-Z0-9]/g, '')).filter(Boolean)
+  }));
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+// 1 edit allowed for phrases under 5 chars, 2 for longer
+function editCap(len) { return len < 5 ? 1 : 2; }
+
+function directorySearch(query) {
+  if (!query || directoryIndex.length === 0) return { results: directoryData, stage: 'none' };
+
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const wordBoundaryRe = new RegExp(`\\b${escaped}\\b`, 'i');
+  const qLower = query.toLowerCase();
+
+  // Stage 1: word-boundary match on SUBJECT, substring match on each KEYWORDS phrase unit.
+  // Subject hits ranked above keyword hits; stop here if anything matches.
+  const subjectHits = [], keywordHits = [];
+  for (const { row, kwPhrases } of directoryIndex) {
+    if (wordBoundaryRe.test(row['SUBJECT'])) {
+      subjectHits.push(row);
+    } else if (kwPhrases.some(p => p.toLowerCase().includes(qLower))) {
+      keywordHits.push(row);
+    }
+  }
+
+  const stage1 = [...subjectHits, ...keywordHits];
+  if (stage1.length > 0) {
+    const stage = subjectHits.length > 0 && keywordHits.length === 0 ? 'subject'
+                : subjectHits.length === 0 ? 'keyword'
+                : 'subject+keyword';
+    return { results: stage1, stage };
+  }
+
+  // Stage 2: Levenshtein fallback — only runs when Stage 1 returns nothing.
+  // Checks (a) full SUBJECT phrase, (b) individual words within SUBJECT (cap=1, tighter than
+  // editCap, to avoid coincidental character matches like "histery"→"Mystery"), (c) KEYWORDS
+  // phrase units. First match wins per entry.
+  const fuzzyHits = [];
+  for (const { row, kwPhrases, subjWords } of directoryIndex) {
+    let matched = false;
+
+    const subj = row['SUBJECT'];
+    if (levenshtein(qLower, subj.toLowerCase()) <= editCap(subj.length)) {
+      matched = true;
+    }
+
+    if (!matched) {
+      for (const word of subjWords) {
+        if (word.length > 0 && levenshtein(qLower, word.toLowerCase()) <= 1) {
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    if (!matched) {
+      for (const phrase of kwPhrases) {
+        if (levenshtein(qLower, phrase.toLowerCase()) <= editCap(phrase.length)) {
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    if (matched) fuzzyHits.push(row);
+  }
+
+  return { results: fuzzyHits, stage: fuzzyHits.length > 0 ? 'fuzzy' : 'no-match' };
+}
+
 /**
  * Perform directory search based on query and floor filter
- * Adapted from old-app-code/public/index.html:1224-1252
  */
 function performDirectorySearch(isFinalSearch = false) {
   const query = elements.searchBar.value.trim();
@@ -118,9 +204,12 @@ function performDirectorySearch(isFinalSearch = false) {
   }
 
   let results = directoryData;
+  let stage = 'none';
 
-  if (query && directoryFuse) {
-    results = directoryFuse.search(query).map(r => r.item);
+  if (query) {
+    const searched = directorySearch(query);
+    results = searched.results;
+    stage = searched.stage;
   }
 
   if (floor) {
@@ -131,7 +220,7 @@ function performDirectorySearch(isFinalSearch = false) {
   elements.rowCount.textContent = `Found ${results.length} of ${directoryData.length} entries.`;
 
   if (isFinalSearch && query) {
-    logSearchQuery(query, results.length, 'directory');
+    logSearchQuery(query, results.length, 'directory', stage);
   }
 
   // Hide keyboard on mobile after search
@@ -152,21 +241,7 @@ async function initializeDirectoryPage() {
     const text = await response.text();
     directoryData = parseCSV(text);
 
-    // Initialize Fuse.js for weighted fuzzy search.
-    // threshold must be >= max(weight_A, weight_B) for a match in either field alone to pass.
-    // Equal weights (0.5/0.5) with threshold 0.6 means a perfect match in EITHER field scores
-    // 0.5 (passes), while no match in either field scores ~1.0 (fails).
-    directoryFuse = new Fuse(directoryData, {
-      keys: [
-        { name: 'SUBJECT', weight: 0.5 },
-        { name: 'KEYWORDS', weight: 0.5 }
-      ],
-      threshold: 0.6,
-      ignoreLocation: true,
-      useExtendedSearch: true,
-      findAllMatches: false,
-      ignoreFieldNorm: true
-    });
+    directoryIndex = buildDirectoryIndex(directoryData);
 
     populateFloorFilter();
     renderDirectoryTable(directoryData);

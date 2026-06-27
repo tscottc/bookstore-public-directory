@@ -82,20 +82,29 @@ To update the data, edit the Google Sheets directly. Changes reflect immediately
 
 ## Search
 
-Search is entirely client-side via **Fuse.js** — no server involved.
-
 ### Directory search
-- Fuzzy matches against `SUBJECT` (50% weight) and `KEYWORDS` (50% weight)
-- Optional floor dropdown filter (AND logic with text search)
-- Threshold `0.6`, `ignoreLocation: true`, `ignoreFieldNorm: true`
 
-**Weight/threshold constraint:** For a match in either field alone to produce a result, the threshold must be ≥ the maximum individual weight. With equal 0.5/0.5 weights, a perfect match in either `SUBJECT` or `KEYWORDS` alone scores 0.5 (passes). Raising weight on one field above the threshold would silently break keyword-only searches.
+Client-side staged search — no Fuse.js, no server.
+
+**Stage 1 — substring (runs first, stops here if anything matches):**
+- Word-boundary regex match of the query against `SUBJECT` (e.g. `"YA"` won't hit `"Myanmar"`)
+- Substring match of the query against each `KEYWORDS` phrase unit (comma-split, not word-split — `"Narcotics anonymous"` stays one unit)
+- Subject hits are ranked above keyword hits in the result list
+
+**Stage 2 — Levenshtein fallback (only runs when Stage 1 returns nothing):**
+- Full `SUBJECT` phrase vs. query: edit cap = 1 for phrases < 5 chars, 2 for longer
+- Individual words within `SUBJECT` vs. query: edit cap fixed at 1 (tighter than above to avoid coincidental matches like `"histery"` → `"Mystery"`)
+- Each `KEYWORDS` phrase unit vs. query: same edit cap as full-phrase
+
+The `stage` that produced each match (`subject`, `keyword`, `subject+keyword`, `fuzzy`, or `no-match`) is included in the search log payload alongside query, result count, and source.
+
+Optional floor dropdown filter applies on top of whichever stage matched (AND logic).
 
 ### FAQ search
-- Fuzzy matches against `Question` (60%), `Keywords` (50%), `Answer` (30%)
-- Threshold `0.2`, same other Fuse.js options
+- Fuzzy matches against `Question` (60%), `Keywords` (50%), `Answer` (30%) via Fuse.js
+- Threshold `0.2`, `ignoreLocation: true`, `ignoreFieldNorm: true`
 
-Both searches support typos and partial matches. Results update on Enter or button click.
+Results update on Enter or button click.
 
 ---
 
