@@ -36,7 +36,7 @@ No `npm`, no build step, no bundler. The entire app is three files: `index.html`
 bookstore-public-directory/
 ├── public/
 │   ├── index.html     # Entry point — markup, nav, modals
-│   ├── app.js         # All application logic (~518 lines)
+│   ├── app.js         # All application logic (~622 lines)
 │   ├── style.css      # All styles (~687 lines)
 │   └── 404.html       # Firebase 404 fallback page
 ├── firebase.json      # Firebase hosting config (serves public/)
@@ -167,8 +167,13 @@ The fixed `?` button (bottom-right corner) opens a scrollable modal with five se
 | Event | Trigger | Parameters |
 |-------|---------|------------|
 | `site_search` | Enter key or search button click (non-empty query only) | `search_term`, `search_location` (`'directory'` or `'faq'`) |
+| `help_modal_open` | Clicking the "?" Help button | — |
+| `help_modal_close` | Closing the Help modal, via the × button or clicking outside it | `close_method` (`'button'` or `'overlay'`), `time_open_seconds` |
+| `section_view` | Switching between the Directory and FAQ tabs | `section_name` (`'directory'` or `'faq'`) |
 
-The push fires once per submitted search — not on every keystroke — giving one clean event per actual search interaction.
+The `site_search` push fires once per submitted search — not on every keystroke — giving one clean event per actual search interaction. `section_view` only fires on an actual change of tab, so re-clicking the already-active tab doesn't double-count.
+
+Each of these events needs a matching Custom Event trigger + GA4 Event tag in GTM (`GA4 - Site Search`, `GA4 - Help Modal Open`, `GA4 - Help Modal Close`, `GA4 - Section Views`) to actually reach GA4 — the `dataLayer.push` alone only makes the data available, GTM does the routing.
 
 ### Search query logging
 

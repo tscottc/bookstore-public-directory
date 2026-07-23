@@ -14,6 +14,9 @@ let faqData = [];
 let faqFuse;
 let isFaqInitialized = false;
 
+let currentSection = 'directory';
+let helpModalOpenedAt = null;
+
 // --- DOM Elements (will be initialized after DOM loads) ---
 let elements = {};
 
@@ -408,6 +411,8 @@ function resetFaqSearch() {
  * Switch between Directory and FAQ sections
  */
 function switchSection(sectionName) {
+  const isActualSwitch = sectionName !== currentSection;
+
   // Update URL hash
   window.location.hash = sectionName;
 
@@ -428,6 +433,17 @@ function switchSection(sectionName) {
       section.classList.remove('active');
     }
   });
+
+  // Log the switch as a real analytics event rather than relying on hash-based
+  // routing to register as a pageview (GA4 history tracking is inconsistent for this).
+  if (isActualSwitch) {
+    currentSection = sectionName;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'section_view',
+      section_name: sectionName
+    });
+  }
 
   // Initialize section if needed
   if (sectionName === 'faq' && !isFaqInitialized) {
@@ -456,13 +472,26 @@ function closeFeedbackModal() {
  */
 function openHelpModal() {
   elements.helpModalOverlay.style.display = 'flex';
+  helpModalOpenedAt = Date.now();
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: 'help_modal_open' });
 }
 
 /**
  * Close help modal
  */
-function closeHelpModal() {
+function closeHelpModal(closeMethod = 'button') {
   elements.helpModalOverlay.style.display = 'none';
+  if (helpModalOpenedAt !== null) {
+    const timeOpenSeconds = Math.round((Date.now() - helpModalOpenedAt) / 1000);
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'help_modal_close',
+      close_method: closeMethod,
+      time_open_seconds: timeOpenSeconds
+    });
+    helpModalOpenedAt = null;
+  }
 }
 
 // --- Initialize App ---
@@ -564,10 +593,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Help Modal Listeners
   elements.helpBtn.addEventListener('click', openHelpModal);
-  elements.closeHelpModal.addEventListener('click', closeHelpModal);
+  elements.closeHelpModal.addEventListener('click', () => closeHelpModal('button'));
   elements.helpModalOverlay.addEventListener('click', (e) => {
     if (e.target === elements.helpModalOverlay) {
-      closeHelpModal();
+      closeHelpModal('overlay');
     }
   });
 
