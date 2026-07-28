@@ -554,6 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Intro modal elements
     introModalOverlay: document.getElementById('intro-modal-overlay'),
     closeIntroModal: document.getElementById('close-intro-modal'),
+    introModalOk: document.getElementById('intro-modal-ok'),
 
     // Modal elements
     feedbackBtn: document.getElementById('feedback-btn'),
@@ -616,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Intro Modal Listeners
   elements.closeIntroModal.addEventListener('click', closeIntroModal);
+  elements.introModalOk.addEventListener('click', closeIntroModal);
   elements.introModalOverlay.addEventListener('click', (e) => {
     if (e.target === elements.introModalOverlay) {
       closeIntroModal();

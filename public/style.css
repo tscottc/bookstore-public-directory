@@ -662,6 +662,24 @@ tr:hover {
   margin-top: 8px;
 }
 
+.intro-modal-ok-btn {
+  margin-top: 22px;
+  background-color: #4a5568;
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.intro-modal-ok-btn:hover {
+  background-color: #2d3748;
+  transform: translateY(-1px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
@@ -746,6 +764,7 @@ tr:hover {
   }
 
   .intro-modal-content {
+    height: auto;
     width: 92%;
     max-height: 90vh;
     padding: 28px 20px 20px;

@@ -139,6 +139,8 @@ Firebase is configured to serve the `public/` directory and ignore dotfiles and 
 
 A popup ("Using This Directory") auto-opens the first time a visitor loads the page, and again after any 24-hour gap since it was last shown — tracked via a timestamp in `localStorage` (`jkk-directory-intro-last-seen`). It explains that the directory catalogs subjects, not individual titles, points visitors to a staff member if their topic isn't listed, and gives a search tip (broad subjects, not specific topics). The same copy is duplicated in the Help modal's "About This Directory" section so it stays accessible after the popup is dismissed.
 
+Dismissible via the × button, the "Got it" button, or by clicking outside the modal — there's no auto-timeout, so it stays open until the visitor closes it.
+
 ---
 
 ## Help Modal
