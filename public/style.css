@@ -202,6 +202,15 @@ tr:hover {
   line-height: 1.2;
 }
 
+.search-tip {
+  margin-top: 14px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  color: #4a5568;
+  line-height: 1.4;
+  font-style: italic;
+}
+
 /* Error Message */
 .error {
   text-align: center;
@@ -597,6 +606,62 @@ tr:hover {
   color: #2d3748;
 }
 
+/* Directory Intro Modal */
+.intro-modal-content {
+  height: auto;
+  max-height: 85vh;
+  width: 90%;
+  max-width: 440px;
+  overflow-y: auto;
+  text-align: center;
+  padding: 36px 28px 28px;
+}
+
+.intro-modal-icon {
+  font-size: 2.25rem;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.intro-modal-content h2 {
+  margin-bottom: 14px;
+}
+
+.intro-modal-text {
+  color: #4a5568;
+  font-size: 0.97rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.intro-modal-tip {
+  margin-top: 18px;
+  padding: 14px 16px;
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.intro-modal-tip-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: white;
+  background-color: #4a5568;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.intro-modal-tip p {
+  color: #4a5568;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
@@ -678,6 +743,12 @@ tr:hover {
   .help-modal-content {
     height: auto;
     max-height: 90vh;
+  }
+
+  .intro-modal-content {
+    width: 92%;
+    max-height: 90vh;
+    padding: 28px 20px 20px;
   }
 }
 

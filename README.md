@@ -9,6 +9,7 @@ An interactive web app for [John K. King Used & Rare Books](https://www.johnking
 - **Directory search** — Find where a book subject is shelved, with optional floor filtering
 - **FAQ** — Browse and search common questions about the store
 - **Feedback** — Submit suggestions via an embedded Google Form
+- **Intro popup** — First-time visitors (or returning visitors after 24 hours) see a "Using This Directory" modal explaining the directory's scope and a search tip; remembered via `localStorage` so it doesn't reappear on every visit
 - **Help modal** — Fixed "?" button opens a guide covering search usage, a directory key (P.B., H.C., End Cap, Case, Center), a floor orientation map (N/S/E/W anchored to building landmarks), store hours, contact info, and links to Feedback and Privacy Policy
 
 Navigation is hash-based (`#directory`, `#faq`) so browser back/forward works naturally.
@@ -36,8 +37,8 @@ No `npm`, no build step, no bundler. The entire app is three files: `index.html`
 bookstore-public-directory/
 ├── public/
 │   ├── index.html     # Entry point — markup, nav, modals
-│   ├── app.js         # All application logic (~622 lines)
-│   ├── style.css      # All styles (~687 lines)
+│   ├── app.js         # All application logic (~667 lines)
+│   ├── style.css      # All styles (~758 lines)
 │   └── 404.html       # Firebase 404 fallback page
 ├── firebase.json      # Firebase hosting config (serves public/)
 ├── .firebaserc        # Firebase project: store-directory-3
@@ -130,6 +131,13 @@ Firebase is configured to serve the `public/` directory and ignore dotfiles and 
 - **Accordion cards** — FAQ answers expand/collapse with a smooth CSS animation; only the clicked card opens
 - **Event delegation** — FAQ accordion clicks use a single listener on the container, not per-card listeners
 - **Mobile responsive** — Layout stacks below 768px; inputs and buttons go full-width; table scrolls horizontally
+- **Intro modal memory** — First visit (or first visit after a 24-hour gap) triggers the intro popup automatically; the timestamp is stored in `localStorage` under `jkk-directory-intro-last-seen`
+
+---
+
+## Intro Modal
+
+A popup ("Using This Directory") auto-opens the first time a visitor loads the page, and again after any 24-hour gap since it was last shown — tracked via a timestamp in `localStorage` (`jkk-directory-intro-last-seen`). It explains that the directory catalogs subjects, not individual titles, points visitors to a staff member if their topic isn't listed, and gives a search tip (broad subjects, not specific topics). The same copy is duplicated in the Help modal's "About This Directory" section so it stays accessible after the popup is dismissed.
 
 ---
 
@@ -139,7 +147,7 @@ The fixed `?` button (bottom-right corner) opens a scrollable modal with five se
 
 | Section | Contents |
 |---------|----------|
-| About This Directory | What the search does, how to use it |
+| About This Directory | What the search does, how to use it, plus a note on directory scope and a search tip |
 | Directory Key | P.B. (Paperback), H.C. (Hardcover), End Cap, Case, Center — plain-English definitions |
 | Finding Your Way | N/S/E/W orientation anchored to building landmarks; note on Front/Rear/East/West directory terms |
 | What This Does Not Do | No book/title/author search; direct to staff for specific items |

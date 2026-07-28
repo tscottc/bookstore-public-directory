@@ -86,7 +86,8 @@ function renderDirectoryTable(data, query = '') {
       elements.resultsContainer.innerHTML = `
         <div class="no-results">
           <p>No results found for "<strong>${query}</strong>".</p>
-          <p class="suggestion-text">Please consider suggesting a subject area to add to the directory.</p>
+          <p class="search-tip">Tip: search just the general subject, without extra descriptive words. For example, instead of "rare comic books," try "comic books."</p>
+          <p class="suggestion-text">Still no luck? Consider suggesting a subject area to add to the directory.</p>
           <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfbHuDXDbKlq85_eDGzYY6xtzqNEXCi7pUlR2I5C0t2EawzIA/viewform?embedded=true" width="640" height="600" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
         </div>`;
     } else {
@@ -453,6 +454,35 @@ function switchSection(sectionName) {
 
 // --- Modal Functions ---
 
+const INTRO_MODAL_STORAGE_KEY = 'jkk-directory-intro-last-seen';
+const INTRO_MODAL_REPEAT_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+/**
+ * Open intro modal
+ */
+function openIntroModal() {
+  elements.introModalOverlay.style.display = 'flex';
+}
+
+/**
+ * Close intro modal
+ */
+function closeIntroModal() {
+  elements.introModalOverlay.style.display = 'none';
+}
+
+/**
+ * Show the intro modal automatically if the visitor hasn't seen it
+ * in the last 24 hours
+ */
+function maybeShowIntroModal() {
+  const lastSeen = Number(localStorage.getItem(INTRO_MODAL_STORAGE_KEY));
+  if (lastSeen && Date.now() - lastSeen < INTRO_MODAL_REPEAT_MS) return;
+
+  openIntroModal();
+  localStorage.setItem(INTRO_MODAL_STORAGE_KEY, String(Date.now()));
+}
+
 /**
  * Open feedback modal
  */
@@ -521,6 +551,10 @@ document.addEventListener('DOMContentLoaded', () => {
     navButtons: document.querySelectorAll('.nav-btn'),
     sections: document.querySelectorAll('.section'),
 
+    // Intro modal elements
+    introModalOverlay: document.getElementById('intro-modal-overlay'),
+    closeIntroModal: document.getElementById('close-intro-modal'),
+
     // Modal elements
     feedbackBtn: document.getElementById('feedback-btn'),
     feedbackModalOverlay: document.getElementById('feedback-modal-overlay'),
@@ -580,6 +614,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Intro Modal Listeners
+  elements.closeIntroModal.addEventListener('click', closeIntroModal);
+  elements.introModalOverlay.addEventListener('click', (e) => {
+    if (e.target === elements.introModalOverlay) {
+      closeIntroModal();
+    }
+  });
+
   // Modal Listeners
   elements.feedbackBtn.addEventListener('click', openFeedbackModal);
   elements.closeFeedbackModal.addEventListener('click', closeFeedbackModal);
@@ -602,6 +644,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize directory page
   initializeDirectoryPage();
+
+  // Show the intro modal for first-time (or 24h-lapsed) visitors
+  maybeShowIntroModal();
 
   // Hash-based routing: Read URL hash on page load
   const hash = window.location.hash.slice(1); // Remove '#' from hash
