@@ -1,12 +1,12 @@
 # John K. King Bookstore — Public Directory & FAQ
 
-An interactive web app for [John K. King Used & Rare Books](https://www.johnkingbooks.com/) — a legendary four-story independent bookstore in Detroit, Michigan. The app lets customers search for book subjects by floor, browse a FAQ, and submit feedback, all without a build step or backend.
+An interactive web app for [John K. King Used & Rare Books](https://www.johnkingbooks.com/) — a legendary four-story independent bookstore in Detroit, Michigan. The app lets customers search for book subjects and see which floor and aisle they're shelved on, browse a FAQ, and submit feedback, all without a build step or backend.
 
 ---
 
 ## What It Does
 
-- **Directory search** — Find where a book subject is shelved, with optional floor filtering
+- **Directory search** — Find where a book subject is shelved
 - **FAQ** — Browse and search common questions about the store
 - **Feedback** — Submit suggestions via an embedded Google Form
 - **Intro popup** — First-time visitors (or returning visitors after 24 hours) see a "Using This Directory" modal explaining the directory's scope and a search tip; remembered via `localStorage` so it doesn't reappear on every visit
@@ -21,7 +21,7 @@ Navigation is hash-based (`#directory`, `#faq`) so browser back/forward works na
 | Layer | Technology |
 |-------|-----------|
 | Language | Vanilla JavaScript (no framework) |
-| Search | [Fuse.js](https://fusejs.io/) v7.0.0 (CDN) |
+| Search | Custom staged search (directory) + [Fuse.js](https://fusejs.io/) v7.0.0 via CDN (FAQ only) |
 | Styling | Plain CSS3 — no preprocessor |
 | Data | Google Sheets published as CSV |
 | Hosting | Firebase Hosting |
@@ -37,8 +37,8 @@ No `npm`, no build step, no bundler. The entire app is three files: `index.html`
 bookstore-public-directory/
 ├── public/
 │   ├── index.html     # Entry point — markup, nav, modals
-│   ├── app.js         # All application logic (~667 lines)
-│   ├── style.css      # All styles (~758 lines)
+│   ├── app.js         # All application logic (~543 lines)
+│   ├── style.css      # All styles (~652 lines)
 │   └── 404.html       # Firebase 404 fallback page
 ├── firebase.json      # Firebase hosting config (serves public/)
 ├── .firebaserc        # Firebase project: store-directory-3
@@ -98,8 +98,6 @@ Client-side staged search — no Fuse.js, no server.
 - Each `KEYWORDS` phrase unit vs. query: same edit cap as full-phrase
 
 The `stage` that produced each match (`subject`, `keyword`, `subject+keyword`, `fuzzy`, or `no-match`) is included in the search log payload alongside query, result count, and source.
-
-Optional floor dropdown filter applies on top of whichever stage matched (AND logic).
 
 ### FAQ search
 - Fuzzy matches against `Question` (60%), `Keywords` (50%), `Answer` (30%) via Fuse.js
@@ -187,7 +185,7 @@ Each of these events needs a matching Custom Event trigger + GA4 Event tag in GT
 
 ### Search query logging
 
-Every submitted search is also sent to a Google Apps Script endpoint (`SEARCH_LOG_URL` in `app.js`) via a fire-and-forget `POST`. The payload is `{ query, resultCount, source }`. Failures are silently swallowed — logging never blocks the UI. This log is separate from GA4 and provides a raw query history in a Google Sheet.
+Every submitted search is also sent to a Google Apps Script endpoint (`SEARCH_LOG_URL` in `app.js`) via a fire-and-forget `POST`. The payload is `{ query, resultCount, source, stage }`. Failures are silently swallowed — logging never blocks the UI. This log is separate from GA4 and provides a raw query history in a Google Sheet.
 
 No analytics configuration is needed for local development.
 
