@@ -64,6 +64,8 @@ firebase serve
 
 Then open `http://localhost:8000` (or whichever port the server prints).
 
+`.claude/launch.json` defines the same thing as a named `static-site` config (`npx serve public` on port 5173) for editors that read it.
+
 > **Note:** The app fetches data from two Google Sheets CSV URLs at runtime. You need an internet connection for data to load, even locally.
 
 ---
