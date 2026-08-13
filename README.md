@@ -83,6 +83,22 @@ To update the data, edit the Google Sheets directly. Changes reflect immediately
 
 ---
 
+## Feedback Forms
+
+Three entry points across the app, pointing at **two different** Google Forms:
+
+| Entry point | Location | Form ID | Purpose |
+|-------------|----------|---------|---------|
+| "Feedback" nav button → modal iframe | `index.html` | `1FAIpQLSdh0t0f1r…` | General customer feedback |
+| Help modal footer link | `index.html` | `1FAIpQLSdh0t0f1r…` | Same form as above |
+| Directory no-results embed | `app.js` → `renderDirectoryTable()` | `1FAIpQLSfbHuDXDb…` | Suggest a subject to add |
+
+The first two intentionally share one form; the no-results embed is deliberately a separate one. When swapping a form, check all three — the third is inside a template string in `app.js`, not in the markup.
+
+> Use the full `docs.google.com/forms/d/e/…/viewform` URL, not a `forms.gle` short link. The modal iframe depends on `?embedded=true`, and the short-link redirect can drop the query string or send headers that block framing.
+
+---
+
 ## Search
 
 ### Directory search
